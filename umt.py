@@ -1,7 +1,7 @@
 #!/usr/bin/python3.4
 
 from os import listdir, mkdir, getcwd
-from os.path import isfile, isdir, join, realpath, getsize  # , getmtime, getsize, exists
+from os.path import isfile, isdir, join, realpath, getsize
 import umt_rar
 import click
 import sys
@@ -62,9 +62,11 @@ def check(rar_path, unpack_path):
 @click.option('--rar-path',
               default=None,
               help='path to rar files',
+              required=True,
               nargs=1)
 @click.option('--unpack-path',
               default='unpack',
+              required=True,
               help='path where to unpack files',
               nargs=1)
 @click.option('--recursive/--non-recursive',
@@ -77,7 +79,18 @@ def mass_unpack(rar_path, unpack_path, recursive):
 
     if isdir(rpath) and isdir(upath):
         rlist = rar_list(rpath, recursive)
-        print(rlist)
+#        print(rlist)
+        for rar_file in rlist:
+#            print(rar_file)
+            rar_info = umt_rar.get_details(rar_file)
+#            print(rar_info)
+            if rar_info is None:
+                pass
+            elif check_if_fully_unpacked(upath, rar_info):
+                print(rar_file, 'unpacked to', rar_info['filename'])
+            else:
+                print(rar_file, 'needs to be unpacked.')
+                umt_rar.unpack_rar(rar_file, upath)
     else:
         print('One of the provided paths is invalid:')
         sys.exit()
@@ -118,7 +131,7 @@ def rar_list(path, recursive):
                 rlist.append(file)
         else:
             print('\'' + file + '\'', 'is neither a file or a directory.')
-    
+
     return rlist
 
 

@@ -1,6 +1,8 @@
 #!/usr/bin/python3.4
 
 import subprocess
+from shutil import which
+import sys
 
 
 # read the details of the rar file, equivalent to 'rar lt filename'
@@ -8,7 +10,11 @@ import subprocess
 # returns a dict with the attribute list
 # TODO check possible error conditions from stderr
 def get_details(filepath):
-    output = subprocess.Popen('rar lt ' + filepath, shell=True,
+    cmd = 'rar'
+    if which(cmd) is None:
+        print(cmd, 'not found in $PATH')
+        sys.exit()
+    output = subprocess.Popen(cmd + ' lt ' + filepath, shell=True,
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout = output.stdout.read().decode("utf-8").split('\n')
 #    stdout = [str_.strip() for str_ in stdout]
@@ -19,7 +25,7 @@ def get_details(filepath):
 
     details = {}
     if 'is not RAR archive' in stdout[4]:
-        pass
+        return None
     else:
 #        i = 0
 #        for element in stdout:
@@ -47,3 +53,26 @@ def get_details(filepath):
         details['ver'] = data[9]
 #    print(details)
     return details
+
+
+# Unpacks rar file to destination directory
+# filepath - rar file that will be unpacked
+# unpack_path - path where to unpack rar file
+# TODO check possible error conditions from stderr
+def unpack_rar(filepath, unpack_path):
+    cmd = 'rar'
+    if which(cmd) is None:
+        print(cmd, 'not found in $PATH')
+        sys.exit()
+#    print(cmd + ' e -o+' + filepath + ' ' + unpack_path)
+#    output = subprocess.Popen(cmd + ' e -o+ ' + filepath + ' ' + unpack_path,
+#                              shell=True,
+#                              stdout=subprocess.PIPE,
+#                              stderr=subprocess.PIPE)
+    output = subprocess.call(cmd + ' e -o+ ' + filepath + ' ' + unpack_path,
+                              shell=True,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+#    print("stdout: ", output.stdout.read())
+#    print("stderr: ", output.stderr.read())
+
