@@ -34,21 +34,20 @@ def ls(path, recursive):
 
 
 @umt.command()
-@click.option('--rar-path',
+@click.option('--rar-file',
               default=None,
               help='path to rar file',
+              required=True,
               nargs=1)
 @click.option('--unpack-path',
               default=None,
               help='path where rar file was unpacked',
+              required=True,
               nargs=1)
-def check(rar_path, unpack_path):
+def check(rar_file, unpack_path):
     """ Check if rar file has already been unpacked correctly """
-    if rar_path is None or unpack_path is None:
-        print('Provide rar and unpack path.')
-        sys.exit()
 
-    rar_file = realpath(rar_path)
+    rar_file = realpath(rar_file)
     if isfile(rar_file) and rar_file.endswith('.rar'):
         rar_info = umt_rar.get_details(rar_file)
         if check_if_fully_unpacked(unpack_path, rar_info):
@@ -56,6 +55,40 @@ def check(rar_path, unpack_path):
                   join(realpath(unpack_path), rar_info['filename']))
         else:
             print('Rar not unpacked')
+
+
+@umt.command('mass-check')
+@click.option('--rar-path',
+              default=None,
+              help='path to directory containing rar files',
+              required=True,
+              nargs=1)
+@click.option('--unpack-path',
+              default=None,
+              help='path where rar files were unpacked',
+              required=True,
+              nargs=1)
+@click.option('--recursive/--non-recursive',
+              default=True,
+              help='if scan should be recursive (default) or not')
+def mass_check(rar_path, unpack_path, recursive):
+    """ Check if rar files in path have already been unpacked correctly """
+
+    rar_path = realpath(rar_path)
+    rlist = rar_list(rar_path, recursive)
+    for rar_file in rlist:
+        rar_info = umt_rar.get_details(rar_file)
+#        print(rar_file)
+#        print(rar_info)
+        if rar_info is None:
+            print('Invalid RAR file',
+                  rar_file)
+        elif check_if_fully_unpacked(unpack_path, rar_info):
+            print('RAR fully unpacked to',
+                  join(realpath(unpack_path), rar_info['filename']))
+        else:
+            print('Rar not unpacked',
+                  rar_file)
 
 
 @umt.command('mass-unpack')
