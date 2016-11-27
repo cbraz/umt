@@ -3,13 +3,14 @@
 import subprocess
 from shutil import which
 import sys
-
+import magic
 
 # read the details of the rar file, equivalent to 'rar lt filename'
 # receives the full path to the rar file
 # returns a dict with the attribute list
 # TODO check possible error conditions from stderr
-def get_details(filepath):
+def get_details_old_rar_util(filepath):
+
     cmd = 'rar'
     if which(cmd) is None:
         print(cmd, 'not found in $PATH')
@@ -19,9 +20,9 @@ def get_details(filepath):
     stdout = output.stdout.read().decode("utf-8").split('\n')
 #    stdout = [str_.strip() for str_ in stdout]
 
-#    print(">>>>FILEPATH: ", filepath)
-#    print("stdout: ", output.stdout)
-#    print("stderr: ", output.stderr)
+    print(">>>>FILEPATH: ", filepath)
+    print("stdout: ", output.stdout)
+    print("stderr: ", output.stderr)
 
     details = {}
     if 'is not RAR archive' in stdout[4]:
@@ -52,6 +53,59 @@ def get_details(filepath):
         details['meth'] = data[8]
         details['ver'] = data[9]
 #    print(details)
+    return details
+
+# read the details of the rar file, equivalent to 'rar lt filename'
+# receives the full path to the rar file
+# returns a dict with the attribute list
+# TODO check possible error conditions from stderr
+def get_details(filepath):
+
+    if 'application/x-rar' not in magic.from_file(filepath, mime=True):
+        return None
+
+    if which('rar') is None:
+        print(cmd, 'not found in $PATH')
+        sys.exit()
+
+    try:
+        out = subprocess.check_output('rar lt ' + filepath,
+                                      stderr=subprocess.STDOUT,
+                                      shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        return None
+
+    print(out.decode('utf-8').split('\n'))
+    details = {}
+    for element in out.decode('utf-8').split('\n'):
+        print(element)
+        if 'Name:' in element:
+            details['name'] = (' ').join(element.split()[1:])
+        elif 'Type:' in element:
+            details['type'] = (' ').join(element.split()[1:])
+        elif 'Size:' in element:
+            details['size'] = (' ').join(element.split()[1:])
+        elif 'Packed size:' in element:
+            details['packed_size'] = (' ').join(element.split()[2:])
+        elif 'Size:' in element:
+            details['size'] = (' ').join(element.split()[1:])
+        elif 'Ratio:' in element:
+            details['ratio'] = (' ').join(element.split()[1:])
+        elif 'Attributes:' in element:
+            details['attributes'] = (' ').join(element.split()[1:])
+        elif 'Pack-CRC32:' in element:
+            details['pack-crc32'] = (' ').join(element.split()[1:])
+        elif 'Host OS:' in element:
+            details['host_os'] = (' ').join(element.split()[1:])
+        elif 'Compression:' in element:
+            details['compression'] = (' ').join(element.split()[1:])
+        elif 'mtime:' in element:
+            details['mtime'] = (' ').join(element.split()[1:])
+
+    for k in details:
+        print(k, '<->', details[k])
+
     return details
 
 

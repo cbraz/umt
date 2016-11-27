@@ -1,4 +1,4 @@
-#!/usr/bin/python3.4
+#!/usr/bin/python3
 
 from os import listdir, mkdir, getcwd
 from os.path import isfile, isdir, join, realpath, getsize
@@ -52,7 +52,7 @@ def check(rar_file, unpack_path):
         rar_info = umt_rar.get_details(rar_file)
         if check_if_fully_unpacked(unpack_path, rar_info):
             print('Rar fully unpacked to',
-                  join(realpath(unpack_path), rar_info['filename']))
+                  join(realpath(unpack_path), rar_info['name']))
         else:
             print('Rar not unpacked')
 
@@ -85,7 +85,7 @@ def mass_check(rar_path, unpack_path, recursive):
                   rar_file)
         elif check_if_fully_unpacked(unpack_path, rar_info):
             print('RAR fully unpacked to',
-                  join(realpath(unpack_path), rar_info['filename']))
+                  join(realpath(unpack_path), rar_info['name']))
         else:
             print('Rar not unpacked',
                   rar_file)
@@ -120,7 +120,7 @@ def mass_unpack(rar_path, unpack_path, recursive):
             if rar_info is None:
                 pass
             elif check_if_fully_unpacked(upath, rar_info):
-                print(rar_file, 'unpacked to', rar_info['filename'])
+                print(rar_file, 'unpacked to', rar_info['name'])
             else:
                 print(rar_file, 'needs to be unpacked.')
                 umt_rar.unpack_rar(rar_file, upath)
@@ -134,7 +134,7 @@ def mass_unpack(rar_path, unpack_path, recursive):
 # rar_info - dict with file information extracted from the rar file
 def check_if_fully_unpacked(upath, rar_info):
     unpack_path = realpath(upath)
-    file_path = join(unpack_path, rar_info['filename'])
+    file_path = join(unpack_path, rar_info['name'])
     try:
         fsize = getsize(file_path)
         if fsize == int(rar_info['size']):
