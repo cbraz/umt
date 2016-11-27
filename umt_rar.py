@@ -76,10 +76,10 @@ def get_details(filepath):
         print(e)
         return None
 
-    print(out.decode('utf-8').split('\n'))
+#    print(out.decode('utf-8').split('\n'))
     details = {}
     for element in out.decode('utf-8').split('\n'):
-        print(element)
+#        print(element)
         if 'Name:' in element:
             details['name'] = (' ').join(element.split()[1:])
         elif 'Type:' in element:
@@ -103,8 +103,8 @@ def get_details(filepath):
         elif 'mtime:' in element:
             details['mtime'] = (' ').join(element.split()[1:])
 
-    for k in details:
-        print(k, '<->', details[k])
+#    for k in details:
+#        print(k, '<->', details[k])
 
     return details
 
